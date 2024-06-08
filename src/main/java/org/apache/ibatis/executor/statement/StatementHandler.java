@@ -29,6 +29,7 @@ import org.apache.ibatis.session.ResultHandler;
  */
 /**
  * 语句处理器
+ * prepareStatement的处理类
  * 
  */
 public interface StatementHandler {
@@ -38,6 +39,7 @@ public interface StatementHandler {
       throws SQLException;
 
   //参数化
+  //调用ParameterHandler.setParameters
   void parameterize(Statement statement)
       throws SQLException;
 

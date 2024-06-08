@@ -59,6 +59,7 @@ class PooledConnection implements InvocationHandler {
     this.createdTimestamp = System.currentTimeMillis();
     this.lastUsedTimestamp = System.currentTimeMillis();
     this.valid = true;
+    // 做了动态代理，这样可以在调用close方法的时候，将连接放回到连接池中
     this.proxyConnection = (Connection) Proxy.newProxyInstance(Connection.class.getClassLoader(), IFACES, this);
   }
 
@@ -238,6 +239,7 @@ class PooledConnection implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
     //如果调用close的话，忽略它，反而将这个connection加入到池中
+    //这里这么做的目的。就是事务在管理连接的时候只会调用close方法，不会调用[closeConnectionToPool]方法
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;

@@ -46,10 +46,12 @@ public class Plugin implements InvocationHandler {
 
   public static Object wrap(Object target, Interceptor interceptor) {
     //取得签名Map
+    // key: 需要拦截的类 (StatementHandler, ParameterHandler, ResultSetHandler, Executor)
+    // value: 需要拦截对象里的多个方法
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     //取得要改变行为的类(ParameterHandler|ResultSetHandler|StatementHandler|Executor)
     Class<?> type = target.getClass();
-    //取得接口
+    //取得接口 (StatementHandler, ParameterHandler, ResultSetHandler, Executor)他们四个其中一个
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
     //产生代理
     if (interfaces.length > 0) {

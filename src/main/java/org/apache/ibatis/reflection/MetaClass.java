@@ -66,6 +66,7 @@ public class MetaClass {
   }
 
   public String findProperty(String name, boolean useCamelCaseMapping) {
+    // 使用驼峰的方式
     if (useCamelCaseMapping) {
       name = name.replace("_", "");
     }
@@ -146,6 +147,7 @@ public class MetaClass {
 
   public boolean hasSetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
+    // 如果有子属性
     if (prop.hasNext()) {
       if (reflector.hasSetter(prop.getName())) {
         MetaClass metaProp = metaClassForProperty(prop.getName());

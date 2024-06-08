@@ -33,7 +33,7 @@ import org.apache.ibatis.session.Configuration;
  */
 /**
  * 映射的语句
- *
+ * 每条sql对应一个MappedStatement
  */
 public final class MappedStatement {
 
@@ -46,15 +46,23 @@ public final class MappedStatement {
   private ResultSetType resultSetType;
   //SQL源码
   private SqlSource sqlSource;
+  // 这里是二级缓存，需要配置开启。
+  // 是sqlSessionFactory级别的缓存，同一个sqlSessionFactory下的所有sqlSession共享一个二级缓存。
   private Cache cache;
+  // 参数映射
   private ParameterMap parameterMap;
+  // 结果映射
   private List<ResultMap> resultMaps;
   private boolean flushCacheRequired;
   private boolean useCache;
   private boolean resultOrdered;
   private SqlCommandType sqlCommandType;
+  // 主键生成器，jdbc3KeyGenerator
   private KeyGenerator keyGenerator;
+  // 主键属性，赋值的字段。
+  // 可以有多个，用逗号分隔
   private String[] keyProperties;
+  // 主键列，数据库中的字段
   private String[] keyColumns;
   private boolean hasNestedResultMaps;
   private String databaseId;
@@ -79,6 +87,7 @@ public final class MappedStatement {
       mappedStatement.resultMaps = new ArrayList<ResultMap>();
       mappedStatement.timeout = configuration.getDefaultStatementTimeout();
       mappedStatement.sqlCommandType = sqlCommandType;
+      // 是否需要生成主键，赋值给对象的keyGenerator属性
       mappedStatement.keyGenerator = configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType) ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
       String logId = id;
       if (configuration.getLogPrefix() != null) {
@@ -156,6 +165,7 @@ public final class MappedStatement {
     }
 
     public Builder keyProperty(String keyProperty) {
+      // 处理都好分割的字符串
       mappedStatement.keyProperties = delimitedStringtoArray(keyProperty);
       return this;
     }

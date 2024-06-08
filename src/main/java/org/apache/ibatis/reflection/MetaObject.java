@@ -54,6 +54,7 @@ public class MetaObject {
     } else if (objectWrapperFactory.hasWrapperFor(object)) {
         //如果有包装器,调用ObjectWrapperFactory.getWrapperFor
       this.objectWrapper = objectWrapperFactory.getWrapperFor(this, object);
+      // 这里走map类型。多个参数就是map类型走这里
     } else if (object instanceof Map) {
         //如果是Map型，返回MapWrapper
       this.objectWrapper = new MapWrapper(this, (Map) object);
@@ -126,18 +127,23 @@ public class MetaObject {
   //取得值
   //如person[0].birthdate.year
   //具体测试用例可以看MetaObjectTest
+  // 具体的例子看objectWrapper是一个map，里边有entity和param1
+  // name是entity.id
   public Object getValue(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
+      // 如果有子节点，创建一个父节点的MetaObject对象
       MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
           //如果上层就是null了，那就结束，返回null
         return null;
       } else {
           //否则继续看下一层，递归调用getValue
+        // 父节点里找子节点的值
        return metaValue.getValue(prop.getChildren());
       }
     } else {
+      // 从map里取父节点对象
       return objectWrapper.get(prop);
     }
   }
@@ -170,6 +176,7 @@ public class MetaObject {
   public MetaObject metaObjectForProperty(String name) {
       //实际是递归调用
     Object value = getValue(name);
+    // 返回一个新的MetaObject对象
     return MetaObject.forObject(value, objectFactory, objectWrapperFactory);
   }
 

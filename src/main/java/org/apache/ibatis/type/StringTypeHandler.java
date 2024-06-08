@@ -26,7 +26,7 @@ import java.sql.SQLException;
 /**
  * String类型处理器
  * 调用PreparedStatement.setString, ResultSet.getString, CallableStatement.getString
- * 
+ * 泛型就是要处理的Java数据类型
  */
 public class StringTypeHandler extends BaseTypeHandler<String> {
 

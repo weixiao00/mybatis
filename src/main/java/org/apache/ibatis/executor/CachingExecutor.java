@@ -75,6 +75,7 @@ public class CachingExecutor implements Executor {
   @Override
   public int update(MappedStatement ms, Object parameterObject) throws SQLException {
 	//刷新缓存完再update
+    // 清理二级缓存
     flushCacheIfRequired(ms);
     return delegate.update(ms, parameterObject);
   }

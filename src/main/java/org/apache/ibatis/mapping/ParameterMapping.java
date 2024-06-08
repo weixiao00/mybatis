@@ -26,7 +26,13 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  */
 /**
+ * 按理说是这个可能不是这个
  * 参数映射
+ * <parameterMap id="para1" type="com.ocean.northatlantic.domain.entity.ocean.UniversityEntity">
+ *         <parameter property="id" javaType="long"></parameter>
+ *         <parameter property="cname" javaType="java.lang.String" jdbcType="BIGINT"></parameter>
+ *         <parameter property="ename" javaType="java.lang.String"></parameter>
+ * </parameterMap>
  * 
  */
 public class ParameterMapping {
@@ -45,6 +51,8 @@ public class ParameterMapping {
   private JdbcType jdbcType;
   //numericScale
   private Integer numericScale;
+  // 这里一定有数据，即使没有设置
+  // 会有默认的typeHandler
   private TypeHandler<?> typeHandler;
   private String resultMapId;
   //jdbcType=NUMERIC

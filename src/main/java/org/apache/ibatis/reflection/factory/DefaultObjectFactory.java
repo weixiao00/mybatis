@@ -68,6 +68,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     try {
       Constructor<T> constructor;
       //如果没有传入constructor，调用空构造函数，核心是调用Constructor.newInstance
+      //无参构造函数
       if (constructorArgTypes == null || constructorArgs == null) {
         constructor = type.getDeclaredConstructor();
         if (!constructor.isAccessible()) {
@@ -80,6 +81,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
       if (!constructor.isAccessible()) {
         constructor.setAccessible(true);
       }
+      // 有参构造函数
       return constructor.newInstance(constructorArgs.toArray(new Object[constructorArgs.size()]));
     } catch (Exception e) {
         //如果出错，包装一下，重新抛出自己的异常

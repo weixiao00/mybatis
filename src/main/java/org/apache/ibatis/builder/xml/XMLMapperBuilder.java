@@ -52,7 +52,7 @@ import org.apache.ibatis.type.TypeHandler;
  */
 /**
  * XML映射构建器，建造者模式,继承BaseBuilder
- *
+ * 解析xml语句的核心类
  */
 public class XMLMapperBuilder extends BaseBuilder {
 

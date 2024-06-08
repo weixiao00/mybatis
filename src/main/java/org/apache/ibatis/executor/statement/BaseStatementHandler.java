@@ -71,8 +71,10 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.boundSql = boundSql;
 
     //生成parameterHandler
+    //这里做了Interceptor拦截
     this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql);
     //生成resultSetHandler
+    //这里做了Interceptor拦截
     this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
   }
 
@@ -92,7 +94,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
-      //实例化Statement
+      //实例化PrepareStatement
       statement = instantiateStatement(connection);
       //设置超时
       setStatementTimeout(statement);

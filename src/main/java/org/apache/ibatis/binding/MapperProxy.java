@@ -57,7 +57,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
     //这里优化了，去缓存中找MapperMethod
     final MapperMethod mapperMethod = cachedMapperMethod(method);
-    //执行
+    //执行。其实是调用了sqlSession里的方法
     return mapperMethod.execute(sqlSession, args);
   }
 

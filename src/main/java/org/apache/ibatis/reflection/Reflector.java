@@ -71,6 +71,9 @@ public class Reflector {
   //构造函数
   private Constructor<?> defaultConstructor;
 
+  // 存储大写的属性名和属性名的映射
+  // key： CNAME
+  // value: cName
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<String, String>();
 
   private Reflector(Class<?> clazz) {

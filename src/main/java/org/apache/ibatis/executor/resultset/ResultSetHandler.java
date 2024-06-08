@@ -25,7 +25,8 @@ import java.util.List;
  */
 /**
  * 结果集处理器
- * 
+ * 这个接口也可以被Interceptor拦截
+ * 插件植入的方式是在BaseStatementHandler的构造方法里
  */
 public interface ResultSetHandler {
 

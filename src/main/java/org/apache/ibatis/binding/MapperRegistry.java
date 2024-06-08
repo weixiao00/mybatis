@@ -48,6 +48,7 @@ public class MapperRegistry {
   @SuppressWarnings("unchecked")
   //返回代理类
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+    // knownMappers这里面的Mapper接口和MapperProxyFactory在加载配置的时候已经添加了
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
     if (mapperProxyFactory == null) {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");

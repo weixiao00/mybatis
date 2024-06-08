@@ -47,7 +47,7 @@ import org.apache.ibatis.type.JdbcType;
  */
 /**
  * XML配置构建器，建造者模式,继承BaseBuilder
- *
+ * 解析全局配置文件的 configuration
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
@@ -314,6 +314,7 @@ public class XMLConfigBuilder extends BaseBuilder {
       
       //下面非常简单，一个个设置属性
       //如何自动映射列到字段/ 属性
+      // 部分自动映射
       configuration.setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
       //缓存
       configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true));

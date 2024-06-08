@@ -47,10 +47,15 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   public int update(Statement statement) throws SQLException {
     //调用PreparedStatement.execute和PreparedStatement.getUpdateCount
     PreparedStatement ps = (PreparedStatement) statement;
+    // 执行更新
     ps.execute();
+    // 获取更新的行数
     int rows = ps.getUpdateCount();
     Object parameterObject = boundSql.getParameterObject();
+    // 处理主键生成 Jdbc3KeyGenerator
+    // update的sql语句这里就是空
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+    // 生成的主键赋值
     keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
     return rows;
   }
@@ -64,7 +69,9 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
+    // 执行真正的查询
     ps.execute();
+    // 处理结果
     return resultSetHandler.<E> handleResultSets(ps);
   }
 
@@ -72,6 +79,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     //调用Connection.prepareStatement
     String sql = boundSql.getSql();
+    // 和插入语句生成id有关？？？确定了是的
     if (mappedStatement.getKeyGenerator() instanceof Jdbc3KeyGenerator) {
       String[] keyColumnNames = mappedStatement.getKeyColumns();
       if (keyColumnNames == null) {
@@ -88,7 +96,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
 
   @Override
   public void parameterize(Statement statement) throws SQLException {
-    //调用ParameterHandler.setParameters
+    //调用ParameterHandler.setParameters 设置参数
     parameterHandler.setParameters((PreparedStatement) statement);
   }
 

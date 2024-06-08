@@ -369,6 +369,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     resultMap = applyCurrentNamespace(resultMap, true);
 
     List<ResultMap> resultMaps = new ArrayList<ResultMap>();
+    // sql上的返回类型指定为resultMap
     if (resultMap != null) {
       //2.1 resultMap是高级功能
       String[] resultMapNames = resultMap.split(",");
@@ -380,6 +381,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
       }
     } else if (resultType != null) {
+      // sql上的返回类型指定为resultType
+
       //2.2 resultType,一般用这个足矣了
       //<select id="selectUsers" resultType="User">
       //这种情况下,MyBatis 会在幕后自动创建一个 ResultMap,基于属性名来映射列到 JavaBean 的属性上。

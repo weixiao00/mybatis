@@ -269,11 +269,13 @@ public class MapperAnnotationBuilder {
       boolean useCache = isSelect;
 
       KeyGenerator keyGenerator;
+      // 默认使用的java字段是id？？？
       String keyProperty = "id";
       String keyColumn = null;
       if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
         // first check for SelectKey annotation - that overrides everything else
         SelectKey selectKey = method.getAnnotation(SelectKey.class);
+        // 处理SelectKey注解。生成主键key
         if (selectKey != null) {
           keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method), languageDriver);
           keyProperty = selectKey.keyProperty();
@@ -281,7 +283,9 @@ public class MapperAnnotationBuilder {
           keyGenerator = configuration.isUseGeneratedKeys() ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
         } else {
           keyGenerator = options.useGeneratedKeys() ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
+          // 赋值给java字段
           keyProperty = options.keyProperty();
+          // 使用哪个数据库字段
           keyColumn = options.keyColumn();
         }
       } else {

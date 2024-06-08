@@ -107,7 +107,9 @@ public class XMLStatementBuilder extends BaseBuilder {
     ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
 
     //获取命令类型(select|insert|update|delete)
+    // 获取<select>标签名字
     String nodeName = context.getNode().getNodeName();
+    // 转大写获取SqlCommandType枚举
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
     boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);

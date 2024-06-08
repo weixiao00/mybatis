@@ -51,6 +51,7 @@ public class SimpleExecutor extends BaseExecutor {
       Configuration configuration = ms.getConfiguration();
       //新建一个StatementHandler
       //这里看到ResultHandler传入的是null
+      // parameter是一个map，放入了sqlSource的参数
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
       //准备语句
       stmt = prepareStatement(handler, ms.getStatementLog());
@@ -69,10 +70,11 @@ public class SimpleExecutor extends BaseExecutor {
       Configuration configuration = ms.getConfiguration();
       //新建一个StatementHandler
       //这里看到ResultHandler传入了
+      //这里做了Interceptor拦截
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
-      //准备语句
+      // 通过连接生成一个prepareStatement对象。并且设置参数了
       stmt = prepareStatement(handler, ms.getStatementLog());
-      //StatementHandler.query
+      //交给resultHandler去查询
       return handler.<E>query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -87,10 +89,13 @@ public class SimpleExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    // 从数据库连接池中获取一个连接
     Connection connection = getConnection(statementLog);
-    //调用StatementHandler.prepare
+    // 调用StatementHandler.prepare
+    // 生成一个prepareStatement对象
     stmt = handler.prepare(connection);
-    //调用StatementHandler.parameterize
+    // 调用preparedStatementHandler.parameterize
+    // 其中就是调用了parameterHandler.setParameters
     handler.parameterize(stmt);
     return stmt;
   }

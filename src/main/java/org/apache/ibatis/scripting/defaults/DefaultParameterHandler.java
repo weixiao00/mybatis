@@ -44,6 +44,9 @@ public class DefaultParameterHandler implements ParameterHandler {
   private final TypeHandlerRegistry typeHandlerRegistry;
 
   private final MappedStatement mappedStatement;
+  // 应该也是一个参数map
+  // key：0,1,2,param1,param2
+  // value：具体的参数值
   private final Object parameterObject;
   private BoundSql boundSql;
   private Configuration configuration;
@@ -73,6 +76,8 @@ public class DefaultParameterHandler implements ParameterHandler {
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           //如果不是OUT，才设进去
           Object value;
+          // java的属性名字
+          // 如果只有一个参数，这里填任何值都可以映射到
           String propertyName = parameterMapping.getProperty();
           if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
             //若有额外的参数, 设为额外的参数
@@ -82,12 +87,19 @@ public class DefaultParameterHandler implements ParameterHandler {
             value = null;
           } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
             //若参数有相应的TypeHandler，直接设object
+            // 有typeHandler说明是基本数据类型，直接设进去
+            // 如果只有一个参数，这里填任何值都可以映射到。除了我们entity。基本数据类型才行
             value = parameterObject;
           } else {
             //除此以外，MetaObject.getValue反射取得值设进去
+            // 多个参数，这里就是map类型。mapwrapper
+            // 一个entity类型的参数。就是一个beanwrapper
             MetaObject metaObject = configuration.newMetaObject(parameterObject);
+            // 这里其实就是从map里取值
+            // 或者是从entity里取值
             value = metaObject.getValue(propertyName);
           }
+          // 这里一定不为空，没有指定会有默认值
           TypeHandler typeHandler = parameterMapping.getTypeHandler();
           JdbcType jdbcType = parameterMapping.getJdbcType();
           if (value == null && jdbcType == null) {

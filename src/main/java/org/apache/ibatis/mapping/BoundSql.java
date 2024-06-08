@@ -39,8 +39,16 @@ import org.apache.ibatis.session.Configuration;
  */
 public class BoundSql {
 
+  // sql语句
   private String sql;
+  // 存储参数映射
+  //<parameterMap id="paramter" type="hashmap">
+  //    <parameter property="record" javaType="com.ocean.northatlantic.domain.entity.ocean.MajorLevel1" />
+  //    <parameter property="example" javaType="com.ocean.northatlantic.domain.entity.ocean.MajorLevel1Example" typeHandler="" mode="" scale="" />
+  //  </parameterMap>
+  // 或者#{}中的参数
   private List<ParameterMapping> parameterMappings;
+  // sql语句的参数对象。之前给封装成了一个map
   private Object parameterObject;
   private Map<String, Object> additionalParameters;
   private MetaObject metaParameters;

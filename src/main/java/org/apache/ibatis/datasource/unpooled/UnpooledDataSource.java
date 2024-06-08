@@ -214,6 +214,7 @@ public class UnpooledDataSource implements DataSource {
     if (!registeredDrivers.containsKey(driver)) {
       Class<?> driverType;
       try {
+        // 加载数据库驱动
         if (driverClassLoader != null) {
           driverType = Class.forName(driver, true, driverClassLoader);
         } else {

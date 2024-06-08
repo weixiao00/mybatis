@@ -98,10 +98,14 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     Transaction tx = null;
     try {
       final Environment environment = configuration.getEnvironment();
+      // 获取一个事务工厂，spring整合mybatis的时候默认使用SpringManagedTransactionFactory
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
-      //通过事务工厂来产生一个事务
+      // 通过事务工厂来产生一个事务
+      // 这里存储了连接
+      // 每个sqlSession有一个事务对象，事务对象里有一个Connection数据库连接。所以sqlSession多线程不能共享
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
       //生成一个执行器(事务包含在执行器里)
+      //这里也做了interceptor拦截
       final Executor executor = configuration.newExecutor(tx, execType);
       //然后产生一个DefaultSqlSession
       return new DefaultSqlSession(configuration, executor, autoCommit);

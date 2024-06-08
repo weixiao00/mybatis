@@ -33,6 +33,7 @@ public class InterceptorChain {
 
   public Object pluginAll(Object target) {
     //循环调用每个Interceptor.plugin方法
+    // 这里就是动态代码还可以被动态代码
     for (Interceptor interceptor : interceptors) {
       target = interceptor.plugin(target);
     }

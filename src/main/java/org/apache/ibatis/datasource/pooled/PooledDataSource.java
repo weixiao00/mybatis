@@ -339,6 +339,13 @@ public class PooledDataSource implements DataSource {
     return ("" + url + username + password).hashCode();
   }
 
+  /**
+   * 1. 将connection从activeConnections中删除
+   * 2. 如果connection有效，且空闲连接数小于poolMaximumIdleConnections，将connection加入到idleConnections列表
+   * 3. 如果空闲连接数已经足够多了，将connection关闭
+   * @param conn
+   * @throws SQLException
+   */
   protected void pushConnection(PooledConnection conn) throws SQLException {
 
     synchronized (state) {
@@ -384,6 +391,19 @@ public class PooledDataSource implements DataSource {
     }
   }
 
+  /**
+   * 1. 从空闲连接中取出一个连接
+   * 2. 如果没有空闲的连接，看是否需要新建一个连接
+   * 3. 如果activeConnections太多，看是否有过期的连接，如果有，删除最老的连接，然后再new一个新连接。
+   * 4. 如果checkout时间不够长，等待吧
+   * 5. 如果已经拿到connection，回滚连接，加入到activeConnections列表，记录checkout时间，返回
+   * 6. 如果没拿到，统计信息：坏连接+1
+   * 7. 如果好几次都拿不到，就放弃了，抛出异常
+   * @param username
+   * @param password
+   * @return
+   * @throws SQLException
+   */
   private PooledConnection popConnection(String username, String password) throws SQLException {
     boolean countedWait = false;
     PooledConnection conn = null;
@@ -393,6 +413,7 @@ public class PooledDataSource implements DataSource {
     //最外面是while死循环，如果一直拿不到connection，则不断尝试
     while (conn == null) {
       synchronized (state) {
+        // 从空闲连接中取出一个连接
         if (!state.idleConnections.isEmpty()) {
           //如果有空闲的连接的话
           // Pool has available connection
@@ -404,9 +425,11 @@ public class PooledDataSource implements DataSource {
         } else {
         	//如果没有空闲的连接
           // Pool does not have available connection
+          // 新建一个连接
           if (state.activeConnections.size() < poolMaximumActiveConnections) {
         	  //如果activeConnections太少,那就new一个PooledConnection
             // Can create new connection
+            // 真正的新建一个连接
             conn = new PooledConnection(dataSource.getConnection(), this);
             if (log.isDebugEnabled()) {
               log.debug("Created connection " + conn.getRealHashCode() + ".");
@@ -459,6 +482,7 @@ public class PooledDataSource implements DataSource {
         	//如果已经拿到connection，则返回
           if (conn.isValid()) {
             if (!conn.getRealConnection().getAutoCommit()) {
+              // 如果不是自动提交的，就回滚
               conn.getRealConnection().rollback();
             }
             conn.setConnectionTypeCode(assembleConnectionTypeCode(dataSource.getUrl(), username, password));

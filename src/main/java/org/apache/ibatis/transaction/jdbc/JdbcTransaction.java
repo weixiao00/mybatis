@@ -45,9 +45,13 @@ public class JdbcTransaction implements Transaction {
 
   private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
+  // DefaultSqlSession级别的连接。意思是一个DefaultSqlSession对应一个Connection。所以DefaultSqlSession是线程不安全的
+  // 多线程使用同一个DefaultSqlSession会出现线程安全问题
   protected Connection connection;
+  // 数据源，有池化实现和非池化实现
   protected DataSource dataSource;
   protected TransactionIsolationLevel level;
+  // 自动提交
   protected boolean autoCommmit;
 
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
@@ -141,7 +145,10 @@ public class JdbcTransaction implements Transaction {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+    // 从数据源中获取一个连接
     connection = dataSource.getConnection();
+    // 设置事务隔离级别。
+    // 连接的隔离级别
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());
     }

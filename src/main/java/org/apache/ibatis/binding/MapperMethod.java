@@ -75,6 +75,9 @@ public class MapperMethod {
       } else {
         //否则就是一条记录
         Object param = method.convertArgsToSqlCommandParam(args);
+        // 这里就是直接调用
+        // command.getName()就是statement的id
+        // 类名+方法名 作为statement的id
         result = sqlSession.selectOne(command.getName(), param);
       }
     } else {
@@ -115,6 +118,7 @@ public class MapperMethod {
           + " needs either a @ResultMap annotation, a @ResultType annotation," 
           + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
     }
+    // 进行参数的转换
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
@@ -127,6 +131,7 @@ public class MapperMethod {
   //多条记录
   private <E> Object executeForMany(SqlSession sqlSession, Object[] args) {
     List<E> result;
+//    这里的param就是一个Map key是#{0},#{1},#{2}...和#{param1},#{param2}...value是值
     Object param = method.convertArgsToSqlCommandParam(args);
     //代入RowBounds
     if (method.hasRowBounds()) {
@@ -194,6 +199,8 @@ public class MapperMethod {
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+      // 其实就是namespace
+      // 类名+方法名 作为statement的id
       String statementName = mapperInterface.getName() + "." + method.getName();
       MappedStatement ms = null;
       if (configuration.hasStatement(statementName)) {
@@ -234,7 +241,11 @@ public class MapperMethod {
     private final String mapKey;
     private final Integer resultHandlerIndex;
     private final Integer rowBoundsIndex;
+    // 这里是参数列表
+    // key是参数的位置，value是参数的名字
+    // key是0，1，2，value是0，1，2
     private final SortedMap<Integer, String> params;
+    // 是否有命名参数@param这种
     private final boolean hasNamedParameters;
 
     public MethodSignature(Configuration configuration, Method method) {
@@ -259,18 +270,22 @@ public class MapperMethod {
         return null;
       } else if (!hasNamedParameters && paramCount == 1) {
         //如果只有一个参数
+        //insert into university (c_name, e_name, city, qs_rank, country)
+        //values (#{cname}, #{ename}, #{city}, #{qsRank}, #{country});
+        // 这种类型的写法应该得hasNamedParameters是false才行。也就是没有@Param注解
         return args[params.keySet().iterator().next().intValue()];
       } else {
         //否则，返回一个ParamMap，修改参数名，参数名就是其位置
+        // 创建的是一个paramMap。get方法取不到值会报错
         final Map<String, Object> param = new ParamMap<Object>();
         int i = 0;
         for (Map.Entry<Integer, String> entry : params.entrySet()) {
-          //1.先加一个#{0},#{1},#{2}...参数
+          //1.先加一个0,1,2...参数
           param.put(entry.getValue(), args[entry.getKey().intValue()]);
           // issue #71, add param names as param1, param2...but ensure backward compatibility
           final String genericParamName = "param" + String.valueOf(i + 1);
           if (!param.containsKey(genericParamName)) {
-            //2.再加一个#{param1},#{param2}...参数
+            //2.再加一个param1,param2...参数
             //你可以传递多个参数给一个映射器方法。如果你这样做了, 
             //默认情况下它们将会以它们在参数列表中的位置来命名,比如:#{param1},#{param2}等。
             //如果你想改变参数的名称(只在多参数情况下) ,那么你可以在参数上使用@Param(“paramName”)注解。 
@@ -278,6 +293,7 @@ public class MapperMethod {
           }
           i++;
         }
+        // 这里的param就是0,1,2...和param1,param2...的参数
         return param;
       }
     }
@@ -351,10 +367,11 @@ public class MapperMethod {
       final SortedMap<Integer, String> params = new TreeMap<Integer, String>();
       final Class<?>[] argTypes = method.getParameterTypes();
       for (int i = 0; i < argTypes.length; i++) {
-        //是否不是RowBounds/ResultHandler类型的参数
+        //是否是RowBounds/ResultHandler类型的参数
         if (!RowBounds.class.isAssignableFrom(argTypes[i]) && !ResultHandler.class.isAssignableFrom(argTypes[i])) {
           //参数名字默认为0,1,2，这就是为什么xml里面可以用#{1}这样的写法来表示参数了
           String paramName = String.valueOf(params.size());
+          // 如果有@Param注解，就用注解的值
           if (hasNamedParameters) {
             //还可以用注解@Param来重命名参数
             paramName = getParamNameFromAnnotation(method, i, paramName);

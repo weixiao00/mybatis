@@ -60,6 +60,8 @@ public abstract class BaseExecutor implements Executor {
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
   //本地缓存机制（Local Cache）防止循环引用（circular references）和加速重复嵌套查询(一级缓存)
   //本地缓存
+  // 一级缓存是指MyBatis中SqlSession级别的缓存，当我们执行查询的时候，MyBatis会将查询结果放入到一级缓存中，
+  // 当再次查询相同的数据时，MyBatis会先去缓存中查询，如果有直接返回，如果没有再去数据库查询。
   protected PerpetualCache localCache;
   //本地输出参数缓存
   protected PerpetualCache localOutputParameterCache;
@@ -72,6 +74,8 @@ public abstract class BaseExecutor implements Executor {
   protected BaseExecutor(Configuration configuration, Transaction transaction) {
     this.transaction = transaction;
     this.deferredLoads = new ConcurrentLinkedQueue<DeferredLoad>();
+    // 这里是一级缓存，创建sqlSession的时候创建的。
+    // 所以一级缓存是sqlSession级别的，也就是说，同一个sqlSession中，多次查询同一个数据，只会查询一次数据库，后面的查询都是从缓存中取的。
     this.localCache = new PerpetualCache("LocalCache");
     this.localOutputParameterCache = new PerpetualCache("LocalOutputParameterCache");
     this.closed = false;
@@ -122,6 +126,7 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     //先清局部缓存，再更新，如何更新交由子类，模板方法模式
+    // 清空一级缓存
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -167,6 +172,7 @@ public abstract class BaseExecutor implements Executor {
       //加一,这样递归调用到上面的时候就不会再清局部缓存了
       queryStack++;
       //先根据cachekey从localCache去查
+      // 新从一级缓存里取数据
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
         //若查到localCache缓存，处理localOutputParameterCache
@@ -238,8 +244,11 @@ public abstract class BaseExecutor implements Executor {
         } else if (parameterObject == null) {
           value = null;
         } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+          // 如果是一个基本类型的参数，在这里创建。参数名字#{1000}这样写也不会报错
           value = parameterObject;
         } else {
+          // 多个参数，在这里通过对象取值
+          // 取不到就报错了。所以#{1000},#{2000}这样写会报错
           MetaObject metaObject = configuration.newMetaObject(parameterObject);
           value = metaObject.getValue(propertyName);
         }
@@ -342,6 +351,7 @@ public abstract class BaseExecutor implements Executor {
       localCache.removeObject(key);
     }
     //加入缓存
+    // 线程不安全的缓存。所以一个sqlSession不能给多个线程共享
     localCache.putObject(key, list);
     //如果是存储过程，OUT参数也加入缓存
     if (ms.getStatementType() == StatementType.CALLABLE) {

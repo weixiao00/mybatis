@@ -50,6 +50,13 @@ public class BatchExecutor extends BaseExecutor {
     super(configuration, transaction);
   }
 
+  /**
+   * 更新语句进行批量操作
+   * @param ms
+   * @param parameterObject
+   * @return
+   * @throws SQLException
+   */
   @Override
   public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
     final Configuration configuration = ms.getConfiguration();
@@ -57,12 +64,14 @@ public class BatchExecutor extends BaseExecutor {
     final BoundSql boundSql = handler.getBoundSql();
     final String sql = boundSql.getSql();
     final Statement stmt;
+    // 已经执行过了，从缓存中获取
     if (sql.equals(currentSql) && ms.equals(currentStatement)) {
       int last = statementList.size() - 1;
       stmt = statementList.get(last);
       BatchResult batchResult = batchResultList.get(last);
       batchResult.addParameterObject(parameterObject);
     } else {
+      // 未执行过，新建一个Statement
       Connection connection = getConnection(ms.getStatementLog());
       stmt = handler.prepare(connection);
       currentSql = sql;
@@ -70,8 +79,11 @@ public class BatchExecutor extends BaseExecutor {
       statementList.add(stmt);
       batchResultList.add(new BatchResult(ms, sql, parameterObject));
     }
+    // 设置参数
     handler.parameterize(stmt);
+    // 添加到批处理。在commit的时候执行executeBatch()提交
     handler.batch(stmt);
+    // 这里无法返回影响行数，所以返回一个固定值
     return BATCH_UPDATE_RETURN_VALUE;
   }
 

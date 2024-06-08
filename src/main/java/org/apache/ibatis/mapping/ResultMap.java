@@ -30,18 +30,30 @@ import org.apache.ibatis.session.Configuration;
 /**
  * 结果映射
  * MyBatis 中最重要最强大的元素
+ * <resultMap id="BaseResultMap" type="com.ocean.northatlantic.domain.entity.ocean.MajorLevel1">
+ *     <id column="id" jdbcType="BIGINT" property="id" />
+ *     <result column="level_name1" jdbcType="VARCHAR" property="levelName1" />
+ *     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+ *     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+ *   </resultMap>
  */
 public class ResultMap {
+  // resultMap的id
   private String id;
+  // 返回值类型
   private Class<?> type;
   private List<ResultMapping> resultMappings;
+  // 下面这三个集合存储的是resultMappings中的数据。都是一样了
   private List<ResultMapping> idResultMappings;
   private List<ResultMapping> constructorResultMappings;
   private List<ResultMapping> propertyResultMappings;
+  // 表中列名的大写
+  // 只有使用resultMap才会有值。需要手写字段映射
   private Set<String> mappedColumns;
   private Discriminator discriminator;
   private boolean hasNestedResultMaps;
   private boolean hasNestedQueries;
+  // 是否自动映射
   private Boolean autoMapping;
 
   private ResultMap() {
@@ -79,6 +91,7 @@ public class ResultMap {
       resultMap.idResultMappings = new ArrayList<ResultMapping>();
       resultMap.constructorResultMappings = new ArrayList<ResultMapping>();
       resultMap.propertyResultMappings = new ArrayList<ResultMapping>();
+      // 返回值类型使用的resultType的话，这里的resultMappings就是空的。否则使用resultMap这里就有值
       for (ResultMapping resultMapping : resultMap.resultMappings) {
         resultMap.hasNestedQueries = resultMap.hasNestedQueries || resultMapping.getNestedQueryId() != null;
         resultMap.hasNestedResultMaps = resultMap.hasNestedResultMaps || (resultMapping.getNestedResultMapId() != null && resultMapping.getResultSet() == null);
@@ -93,9 +106,12 @@ public class ResultMap {
             }
           }
         }
+        // 构造方法构造
+        // 没用过
         if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
           resultMap.constructorResultMappings.add(resultMapping);
         } else {
+          // 否则属性构造
           resultMap.propertyResultMappings.add(resultMapping);
         }
         if (resultMapping.getFlags().contains(ResultFlag.ID)) {
@@ -106,6 +122,7 @@ public class ResultMap {
         resultMap.idResultMappings.addAll(resultMap.resultMappings);
       }
       // lock down collections
+      // 不可变集合
       resultMap.resultMappings = Collections.unmodifiableList(resultMap.resultMappings);
       resultMap.idResultMappings = Collections.unmodifiableList(resultMap.idResultMappings);
       resultMap.constructorResultMappings = Collections.unmodifiableList(resultMap.constructorResultMappings);

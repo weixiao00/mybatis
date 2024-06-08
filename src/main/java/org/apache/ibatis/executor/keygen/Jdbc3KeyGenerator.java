@@ -56,24 +56,36 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     ResultSet rs = null;
     try {
       //核心是使用JDBC3的Statement.getGeneratedKeys
+      // 生成的主键值
+      // jdbc的getGeneratedKeys方法，用于获取数据库自动生成的主键值
       rs = stmt.getGeneratedKeys();
       final Configuration configuration = ms.getConfiguration();
       final TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+      // 主键需要赋值的属性。
+      // 可以有多个，用逗号隔开
+      // entity.id,entity1.id
       final String[] keyProperties = ms.getKeyProperties();
+      // 表的元数据
       final ResultSetMetaData rsmd = rs.getMetaData();
       TypeHandler<?>[] typeHandlers = null;
+      // keyProperties是一个数据没啥用呢。因为只有一个主键。这里走不进去了
       if (keyProperties != null && rsmd.getColumnCount() >= keyProperties.length) {
+        // 可有多个参数。比如一个入参数也可以有多个参数
+        // entity, param1
+        // 如果是entity一般就是一个参数
         for (Object parameter : parameters) {
           // there should be one row for each statement (also one for each parameter)
           if (!rs.next()) {
             break;
           }
+          // 创建元对象
           final MetaObject metaParam = configuration.newMetaObject(parameter);
           if (typeHandlers == null) {
             //先取得类型处理器
             typeHandlers = getTypeHandlers(typeHandlerRegistry, metaParam, keyProperties);
           }
-          //填充键值
+          // 填充键值
+          // 通过类型处理器，将生成的主键值填充到参数对象中
           populateKeys(rs, metaParam, keyProperties, typeHandlers);
         }
       }
@@ -102,11 +114,21 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     return typeHandlers;
   }
 
+  /**
+   * 填充主键
+   * @param rs
+   * @param metaParam
+   * @param keyProperties
+   * @param typeHandlers
+   * @throws SQLException
+   */
   private void populateKeys(ResultSet rs, MetaObject metaParam, String[] keyProperties, TypeHandler<?>[] typeHandlers) throws SQLException {
     for (int i = 0; i < keyProperties.length; i++) {
       TypeHandler<?> th = typeHandlers[i];
       if (th != null) {
+        // 获取返回结果，其实就是id的值
         Object value = th.getResult(rs, i + 1);
+        // 通过typeHandler进行id的赋值
         metaParam.setValue(keyProperties[i], value);
       }
     }

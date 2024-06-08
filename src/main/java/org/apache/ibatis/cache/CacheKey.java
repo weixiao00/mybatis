@@ -27,6 +27,7 @@ import java.util.List;
  * 缓存key
  * 一般缓存框架的数据结构基本上都是 Key-Value 方式存储，
  * MyBatis 对于其 Key 的生成采取规则为：[mappedStementId + offset + limit + SQL + queryParams + environment]生成一个哈希码
+ * 重写了equal和hashcode方法，从map里取值的时候直接调用这个两个方法进行比较
  */
 public class CacheKey implements Cloneable, Serializable {
 

@@ -125,12 +125,21 @@ public class DefaultSqlSession implements SqlSession {
   }
 
   //核心selectList
+  /**
+   *
+   * @param statement 类名+方法名
+   * @param parameter 方法参数，是一个map
+   * @param rowBounds 分页参数。虽然传进去了。除了创建缓存key时候用的，其他的地方没有用到
+   * @return
+   * @param <E>
+   */
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
-      //根据statement id找到对应的MappedStatement
+      //根据statement id找到对应的MappedStatement。MappedStatement是对应的每一条SQL语句的封装
       MappedStatement ms = configuration.getMappedStatement(statement);
       //转而用执行器来查询结果,注意这里传入的ResultHandler是null
+      // 这里的ResultHandler是处理表里每一行数据的类
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -279,6 +288,7 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> T getMapper(Class<T> type) {
     //最后会去调用MapperRegistry.getMapper
+    // 最本质是动态代码生成，生成一个代理类，代理类中有一个MapperMethod对象，MapperMethod对象中有一个MappedStatement对象
     return configuration.<T>getMapper(type, this);
   }
 
