@@ -97,4 +97,4 @@ org.apache.ibatis.executor.statement
 18.插件
 org.apache.ibatis.plugin
 
-
+看代码入口：DefaultSqlSessionFactory.openSession()方法返回DefaultSqlSession。DefaultSqlSession.selectOne方法

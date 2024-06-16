@@ -36,6 +36,7 @@ public class PerpetualCache implements Cache {
   private String id;
 
   //内部就是一个HashMap,所有方法基本就是直接调用HashMap的方法,不支持多线程？
+  // 所以说sqlSession是线程不安全的。这里就是一种体现
   private Map<Object, Object> cache = new HashMap<Object, Object>();
 
   public PerpetualCache(String id) {

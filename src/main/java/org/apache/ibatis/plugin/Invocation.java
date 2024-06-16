@@ -28,10 +28,13 @@ import java.lang.reflect.Method;
 public class Invocation {
 
   //调用的对象
+  // 拦截的对象
   private Object target;
   //调用的方法
+  // 拦截的方法
   private Method method;
   //参数
+  // 拦截的方法的参数
   private Object[] args;
 
   public Invocation(Object target, Method method, Object[] args) {
